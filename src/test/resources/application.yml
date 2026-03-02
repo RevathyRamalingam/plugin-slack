@@ -8,7 +8,5 @@ kestra:
     local:
       base-path: /tmp/unittest
   url: https://mysuperhost.com/kestra/ui
-
-micronaut:
-  server:
-    port: 59443
+  encryption:
+    secret-key: I6EGNzRESu3X3pKZidrqCGOHQFUFC0yK

@@ -1,0 +1,59 @@
+package io.kestra.plugin.slack.app.models;
+
+import com.slack.api.model.Purpose;
+import com.slack.api.model.Topic;
+import io.kestra.core.models.annotations.PluginProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
+import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
+
+import java.time.Instant;
+
+import static io.kestra.plugin.slack.services.MessageService.fromSlackTimestamp;
+
+@Value
+@Builder
+@Jacksonized
+@Schema(
+    title = "Conversation topic/purpose output"
+)
+public class ConversationTopicOutput implements io.kestra.core.models.tasks.Output {
+    @Schema(title = "Value")
+    @NotNull
+    @PluginProperty
+    String value;
+
+    @Schema(title = "Creator ID")
+    @PluginProperty
+    String creator;
+
+    @Schema(title = "Last set timestamp")
+    @PluginProperty
+    Instant lastSet;
+
+    public static ConversationTopicOutput of(Topic topic) {
+        if (topic == null) {
+            return null;
+        }
+
+        return ConversationTopicOutput.builder()
+            .value(topic.getValue())
+            .creator(topic.getCreator())
+            .lastSet(fromSlackTimestamp(topic.getLastSet()))
+            .build();
+    }
+
+    public static ConversationTopicOutput of(Purpose purpose) {
+        if (purpose == null) {
+            return null;
+        }
+
+        return ConversationTopicOutput.builder()
+            .value(purpose.getValue())
+            .creator(purpose.getCreator())
+            .lastSet(fromSlackTimestamp(purpose.getLastSet()))
+            .build();
+    }
+}

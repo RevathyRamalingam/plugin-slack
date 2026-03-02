@@ -1,0 +1,194 @@
+package io.kestra.plugin.slack.app.chats;
+
+
+import com.slack.api.methods.request.chat.ChatPostMessageRequest;
+import com.slack.api.methods.response.chat.ChatPostMessageResponse;
+import io.kestra.core.models.annotations.Example;
+import io.kestra.core.models.annotations.Plugin;
+import io.kestra.core.models.property.Property;
+import io.kestra.core.models.tasks.RunnableTask;
+import io.kestra.core.runners.RunContext;
+import io.kestra.core.serializers.JacksonMapper;
+import io.kestra.plugin.slack.AbstractSlackClientConnection;
+import io.kestra.plugin.slack.MessagePayloadInterface;
+import io.kestra.plugin.slack.services.MessageService;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import lombok.extern.jackson.Jacksonized;
+
+import java.time.Instant;
+import java.util.Map;
+
+@SuperBuilder
+@ToString
+@EqualsAndHashCode(callSuper = true)
+@Getter
+@NoArgsConstructor
+@Schema(
+    title = "Post a Slack message",
+    description = "Sends a message with text, blocks, or attachments. Accepts either raw JSON `payload` or `messageText`; channel and thread can also come from the payload. Requires `chat:write`."
+)
+@Plugin(
+    examples = {
+        @Example(
+            title = "Post a simple text message",
+            full = true,
+            code = """
+                id: slack_post_message
+                namespace: company.team
+
+                tasks:
+                  - id: post_message
+                    type: io.kestra.plugin.slack.app.chats.Post
+                    token: "{{ secret('SLACK_TOKEN') }}"
+                    channel: "#general"
+                    messageText: "Hello from Kestra!"
+                """
+        ),
+        @Example(
+            title = "Post a message with custom payload",
+            full = true,
+            code = """
+                id: slack_post_custom
+                namespace: company.team
+
+                tasks:
+                  - id: post_message
+                    type: io.kestra.plugin.slack.app.chats.Post
+                    token: "{{ secret('SLACK_TOKEN') }}"
+                    channel: "#general"
+                    payload: |
+                      {
+                        "text": "Workflow completed successfully",
+                        "blocks": [
+                          {
+                            "type": "section",
+                            "text": {
+                              "type": "mrkdwn",
+                              "text": "*Status:* :white_check_mark: Success"
+                            }
+                          }
+                        ]
+                      }
+                """
+        ),
+        @Example(
+            title = "Post a message to a thread",
+            full = true,
+            code = """
+                id: slack_post_thread
+                namespace: company.team
+
+                tasks:
+                  - id: post_message
+                    type: io.kestra.plugin.slack.app.chats.Post
+                    token: "{{ secret('SLACK_TOKEN') }}"
+                    channel: "#general"
+                    messageText: "Main message"
+
+                  - id: reply_message
+                    type: io.kestra.plugin.slack.app.chats.Post
+                    token: "{{ secret('SLACK_TOKEN') }}"
+                    channel: "#general"
+                    messageText: "Reply in thread"
+                    timestamp: "{{ outputs.post_message.timestamp }}"
+                """
+        )
+    }
+)
+public class Post extends AbstractSlackClientConnection implements RunnableTask<Post.Output>, MessagePayloadInterface, ChatInterface {
+    private Property<String> payload;
+    private Property<String> messageText;
+    private Property<String> channel;
+    private Property<Instant> timestamp;
+    private Property<String> username;
+    private Property<String> iconUrl;
+    private Property<String> iconEmoji;
+
+    @Override
+    public Output run(RunContext runContext) throws Exception {
+        var builder = ChatPostMessageRequest.builder();
+
+        String json = MessageService.prepareMessageAsJson(runContext, this.payload, this.messageText);
+        Map<String, Object> map = JacksonMapper.toMap(json);
+
+        if (map.containsKey("channel")) {
+            builder.channel((String) map.get("channel"));
+        } else if (this.channel != null) {
+            builder.channel(runContext.render(this.channel).as(String.class).orElseThrow());
+        }
+
+        if (map.containsKey("thread_ts")) {
+            builder.threadTs((String) map.get("thread_ts"));
+        } else if (this.timestamp != null) {
+            builder.threadTs(runContext.render(this.timestamp).as(Instant.class).map(MessageService::toSlackTimestamp).orElseThrow());
+        }
+
+        if (map.containsKey("icon_emoji")) {
+            builder.iconEmoji((String) map.get("icon_emoji"));
+        } else if (iconEmoji != null) {
+            builder.iconEmoji(runContext.render(this.iconEmoji).as(String.class).orElseThrow());
+        }
+
+        if (map.containsKey("icon_url")) {
+            builder.iconUrl((String) map.get("icon_url"));
+        } else if (iconUrl != null) {
+            builder.iconUrl(runContext.render(this.iconUrl).as(String.class).orElseThrow());
+        }
+
+        if (map.containsKey("username")) {
+            builder.username((String) map.get("username"));
+        } else if (username != null) {
+            builder.username(runContext.render(this.username).as(String.class).orElseThrow());
+        }
+
+        if (map.containsKey("text")) {
+            builder.text((String) map.get("text"));
+        }
+
+        if (map.containsKey("blocks")) {
+            builder.blocksAsString(JacksonMapper.ofJson().writeValueAsString(map.get("blocks")));
+        }
+
+        if (map.containsKey("attachments")) {
+            builder.attachmentsAsString(JacksonMapper.ofJson().writeValueAsString(map.get("attachments")));
+        }
+
+        if (map.containsKey("reply_broadcast")) {
+            builder.replyBroadcast((Boolean) map.get("reply_broadcast"));
+        }
+
+        if (map.containsKey("unfurl_links")) {
+            builder.unfurlLinks((Boolean) map.get("unfurl_links"));
+        }
+
+        if (map.containsKey("unfurl_media")) {
+            builder.unfurlMedia((Boolean) map.get("unfurl_media"));
+        }
+
+        if (map.containsKey("mrkdwn")) {
+            builder.mrkdwn((Boolean) map.get("mrkdwn"));
+        }
+
+        if (map.containsKey("metadata")) {
+            builder.metadataAsString(JacksonMapper.ofJson().writeValueAsString(map.get("metadata")));
+        }
+
+        ChatPostMessageResponse response = call(runContext, (client) -> client.chatPostMessage(builder.build()));
+
+        return Post.Output.builder()
+            .timestamp(response.getTs())
+            .build();
+    }
+
+    @Value
+    @Builder
+    @Jacksonized
+    public static class Output implements io.kestra.core.models.tasks.Output {
+        @Schema(title = "Timestamp of posted message")
+        @NotNull
+        String timestamp;
+    }
+}
