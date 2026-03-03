@@ -1,4 +1,4 @@
-package io.kestra.plugin.slack;
+package io.kestra.plugin.slack.notifications;
 
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
@@ -7,6 +7,7 @@ import io.kestra.core.models.tasks.VoidOutput;
 import io.kestra.core.plugins.notifications.ExecutionInterface;
 import io.kestra.core.plugins.notifications.ExecutionService;
 import io.kestra.core.runners.RunContext;
+import io.kestra.plugin.slack.SlackTemplate;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -21,7 +22,7 @@ import java.util.Map;
 @Schema(
     title = "Send a Slack message with the execution information.",
     description = "The message will include a link to the execution page in the UI along with the execution ID, namespace, flow name, the start date, duration, the final status of the execution, and the last task ID in an execution.\n\n" +
-    "Use this notification task only in a flow that has a [Flow trigger](https://kestra.io/docs/administrator-guide/monitoring#alerting). Don't use this notification task in `errors` tasks. Instead, for `errors` tasks, use the [SlackIncomingWebhook](https://kestra.io/plugins/plugin-slack/io.kestra.plugin.slack.slackincomingwebhook) task."
+    "Use this notification task only in a flow that has a [Flow trigger](https://kestra.io/docs/administrator-guide/monitoring#alerting). Don't use this notification task in `errors` tasks. Instead, for `errors` tasks, use the [SlackIncomingWebhook](https://kestra.io/plugins/plugin-slack/io.kestra.plugin.slack.notifications.slackincomingwebhook) task."
 )
 @Plugin(
     examples = {
@@ -34,7 +35,7 @@ import java.util.Map;
 
                 tasks:
                   - id: send_alert
-                    type: io.kestra.plugin.slack.SlackExecution
+                    type: io.kestra.plugin.slack.notifications.SlackExecution
                     url: "{{ secret('SLACK_WEBHOOK') }}" # format: https://hooks.slack.com/services/xzy/xyz/xyz
                     executionId: "{{trigger.executionId}}"
 
@@ -60,7 +61,7 @@ import java.util.Map;
 
                 tasks:
                   - id: send_alert_to_rocket_chat
-                    type: io.kestra.plugin.slack.SlackExecution
+                    type: io.kestra.plugin.slack.notifications.SlackExecution
                     url: "{{ secret('ROCKET_CHAT_WEBHOOK') }}"
                     channel: "#errors"
                     username: "Kestra TEST"
@@ -81,7 +82,11 @@ import java.util.Map;
                 """
         )
     },
-    aliases = "io.kestra.plugin.notifications.slack.SlackExecution"
+    aliases = {
+        "io.kestra.plugin.notifications.slack.SlackExecution",
+        "io.kestra.plugin.slack.SlackExecution"
+    }
+
 )
 public class SlackExecution extends SlackTemplate implements ExecutionInterface {
     @Builder.Default
