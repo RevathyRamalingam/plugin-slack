@@ -1,9 +1,16 @@
 package io.kestra.plugin.slack.notifications;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Map;
+
+import org.slf4j.Logger;
+
 import com.slack.api.Slack;
 import com.slack.api.SlackConfig;
 import com.slack.api.util.http.SlackHttpClient;
 import com.slack.api.webhook.WebhookResponse;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
@@ -13,6 +20,7 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.slack.AbstractSlackWebhookConnection;
 import io.kestra.plugin.slack.MessagePayloadInterface;
 import io.kestra.plugin.slack.services.MessageService;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.EqualsAndHashCode;
@@ -22,11 +30,6 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.slf4j.Logger;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Map;
 
 @SuperBuilder
 @ToString
@@ -163,7 +166,6 @@ public class SlackIncomingWebhook extends AbstractSlackWebhookConnection impleme
     @NotEmpty
     private String url;
 
-
     @Override
     public VoidOutput run(RunContext runContext) throws Exception {
         // Render variables once with 'r' prefix
@@ -177,27 +179,35 @@ public class SlackIncomingWebhook extends AbstractSlackWebhookConnection impleme
         if (this.options != null && this.options.getHeaders() != null) {
             WebhookResponse response = sendWithCustomHeaders(runContext, rUrl, rPayloadJson);
 
-            logger.debug("Response: code={}, message={}, body={}",
-                response.getCode(), response.getMessage(), response.getBody());
+            logger.debug(
+                "Response: code={}, message={}, body={}",
+                response.getCode(), response.getMessage(), response.getBody()
+            );
 
             if (response.getCode() == 200) {
                 logger.info("Request succeeded");
             } else {
-                throw new IOException("Slack webhook request failed with status " + response.getCode() +
-                    ": " + response.getMessage() + " - " + response.getBody());
+                throw new IOException(
+                    "Slack webhook request failed with status " + response.getCode() +
+                        ": " + response.getMessage() + " - " + response.getBody()
+                );
             }
         } else {
             Slack slack = createConfiguredSlackInstance(runContext);
             WebhookResponse response = slack.send(rUrl, rPayloadJson);
 
-            logger.debug("Response: code={}, message={}, body={}",
-                response.getCode(), response.getMessage(), response.getBody());
+            logger.debug(
+                "Response: code={}, message={}, body={}",
+                response.getCode(), response.getMessage(), response.getBody()
+            );
 
             if (response.getCode() == 200) {
                 logger.info("Request succeeded");
             } else {
-                throw new IOException("Slack webhook request failed with status " + response.getCode() +
-                    ": " + response.getMessage() + " - " + response.getBody());
+                throw new IOException(
+                    "Slack webhook request failed with status " + response.getCode() +
+                        ": " + response.getMessage() + " - " + response.getBody()
+                );
             }
         }
 
@@ -251,7 +261,8 @@ public class SlackIncomingWebhook extends AbstractSlackWebhookConnection impleme
         OkHttpClient.Builder okHttpBuilder = new OkHttpClient.Builder();
 
         if (rHeaders != null) {
-            okHttpBuilder.addInterceptor(chain -> {
+            okHttpBuilder.addInterceptor(chain ->
+            {
                 Request.Builder requestBuilder = chain.request().newBuilder();
                 rHeaders.forEach(requestBuilder::addHeader);
                 return chain.proceed(requestBuilder.build());

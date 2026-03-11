@@ -1,11 +1,11 @@
 package io.kestra.plugin.slack.app.models;
 
+import java.util.List;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
-
-import java.util.List;
 
 @Value
 @Builder

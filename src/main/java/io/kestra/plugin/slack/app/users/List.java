@@ -1,7 +1,13 @@
 package io.kestra.plugin.slack.app.users;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URI;
+
 import com.slack.api.methods.request.users.UsersListRequest;
 import com.slack.api.methods.response.users.UsersListResponse;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
@@ -12,16 +18,12 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.FileSerde;
 import io.kestra.plugin.slack.AbstractSlackClientConnection;
 import io.kestra.plugin.slack.app.models.UserOutput;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import reactor.core.publisher.Flux;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.net.URI;
 
 @SuperBuilder
 @ToString
@@ -80,16 +82,15 @@ public class List extends AbstractSlackClientConnection implements RunnableTask<
                 UsersListResponse response = call(runContext, (client) -> client.usersList(builder.build()));
 
                 size = size + response.getMembers().size();
-                Flux<UserOutput> flux = Flux.fromStream(response
-                    .getMembers()
-                    .stream()
-                    .map(UserOutput::of)
+                Flux<UserOutput> flux = Flux.fromStream(
+                    response
+                        .getMembers()
+                        .stream()
+                        .map(UserOutput::of)
                 );
                 FileSerde.writeAll(fileWriter, flux).block();
 
-                var newCursor = response.getResponseMetadata() != null && !response.getResponseMetadata().getNextCursor().isEmpty() ?
-                    response.getResponseMetadata().getNextCursor() :
-                    null;
+                var newCursor = response.getResponseMetadata() != null && !response.getResponseMetadata().getNextCursor().isEmpty() ? response.getResponseMetadata().getNextCursor() : null;
                 cursor = newCursor == null || newCursor.equals(cursor) ? null : newCursor;
             } while (cursor != null && !cursor.isEmpty());
         }

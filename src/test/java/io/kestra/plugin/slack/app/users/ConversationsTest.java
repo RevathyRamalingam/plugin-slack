@@ -1,7 +1,13 @@
 package io.kestra.plugin.slack.app.users;
 
+import java.io.InputStreamReader;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
 import com.google.common.io.CharStreams;
 import com.slack.api.model.ConversationType;
+
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
@@ -9,13 +15,10 @@ import io.kestra.core.storages.StorageInterface;
 import io.kestra.core.tenant.TenantService;
 import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
-import io.kestra.plugin.slack.app.AbstractSlackClientTest;
 import io.kestra.plugin.slack.FakeWebhookController;
-import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
+import io.kestra.plugin.slack.app.AbstractSlackClientTest;
 
-import java.io.InputStreamReader;
-import java.util.Map;
+import jakarta.inject.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,12 +1,12 @@
 package io.kestra.plugin.slack.app.models;
 
 import io.kestra.core.models.annotations.PluginProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
-
-import jakarta.validation.constraints.NotNull;
 
 @Value
 @Builder

@@ -1,8 +1,10 @@
 package io.kestra.plugin.slack.app.conversations;
 
+import java.util.List;
 
 import com.slack.api.methods.request.conversations.ConversationsInviteRequest;
 import com.slack.api.methods.response.conversations.ConversationsInviteResponse;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
@@ -10,12 +12,11 @@ import io.kestra.core.models.tasks.RunnableTask;
 import io.kestra.core.runners.RunContext;
 import io.kestra.plugin.slack.AbstractSlackClientConnection;
 import io.kestra.plugin.slack.app.models.ConversationOutput;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 @SuperBuilder
 @ToString
@@ -66,7 +67,6 @@ public class Invite extends AbstractSlackClientConnection implements RunnableTas
 
         runContext.render(this.channel).as(String.class).ifPresent(builder::channel);
         builder.users(runContext.render(this.users).asList(String.class));
-
 
         ConversationsInviteResponse response = call(runContext, (client) -> client.conversationsInvite(builder.build()));
 

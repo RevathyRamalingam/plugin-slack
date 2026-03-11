@@ -1,8 +1,14 @@
 package io.kestra.plugin.slack.app.users;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URI;
+
 import com.slack.api.methods.request.users.UsersConversationsRequest;
 import com.slack.api.methods.response.users.UsersConversationsResponse;
 import com.slack.api.model.ConversationType;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
@@ -13,16 +19,12 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.FileSerde;
 import io.kestra.plugin.slack.AbstractSlackClientConnection;
 import io.kestra.plugin.slack.app.models.ConversationOutput;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import reactor.core.publisher.Flux;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.net.URI;
 
 @SuperBuilder
 @ToString
@@ -88,7 +90,6 @@ public class Conversations extends AbstractSlackClientConnection implements Runn
         runContext.render(this.excludeArchived).as(Boolean.class).ifPresent(builder::excludeArchived);
         builder.types(runContext.render(this.types).asList(ConversationType.class));
 
-
         Long size = 0L;
         File tempFile = runContext.workingDir().createTempFile(".ion").toFile();
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)) {
@@ -98,16 +99,15 @@ public class Conversations extends AbstractSlackClientConnection implements Runn
                 UsersConversationsResponse response = call(runContext, (client) -> client.usersConversations(builder.build()));
 
                 size = size + response.getChannels().size();
-                Flux<ConversationOutput> flux = Flux.fromStream(response
-                    .getChannels()
-                    .stream()
-                    .map(ConversationOutput::of)
+                Flux<ConversationOutput> flux = Flux.fromStream(
+                    response
+                        .getChannels()
+                        .stream()
+                        .map(ConversationOutput::of)
                 );
                 FileSerde.writeAll(fileWriter, flux).block();
 
-                var newCursor = response.getResponseMetadata() != null && !response.getResponseMetadata().getNextCursor().isEmpty() ?
-                    response.getResponseMetadata().getNextCursor() :
-                    null;
+                var newCursor = response.getResponseMetadata() != null && !response.getResponseMetadata().getNextCursor().isEmpty() ? response.getResponseMetadata().getNextCursor() : null;
                 cursor = newCursor == null || newCursor.equals(cursor) ? null : newCursor;
             } while (cursor != null && !cursor.isEmpty());
         }

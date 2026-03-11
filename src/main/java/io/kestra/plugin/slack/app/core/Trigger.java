@@ -1,5 +1,14 @@
 package io.kestra.plugin.slack.app.core;
 
+import java.lang.reflect.Field;
+import java.net.http.HttpHeaders;
+import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,6 +22,7 @@ import com.slack.api.bolt.response.Response;
 import com.slack.api.bolt.util.QueryStringParser;
 import com.slack.api.bolt.util.SlackRequestParser;
 import com.slack.api.model.event.*;
+
 import io.kestra.core.exceptions.IllegalVariableEvaluationException;
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
@@ -29,21 +39,13 @@ import io.kestra.core.serializers.JacksonMapper;
 import io.kestra.plugin.core.trigger.AbstractWebhookTrigger;
 import io.kestra.plugin.core.trigger.WebhookContext;
 import io.kestra.plugin.core.trigger.WebhookResponse;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import reactor.core.publisher.Mono;
-
-import java.lang.reflect.Field;
-import java.net.http.HttpHeaders;
-import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Pattern;
 
 @SuperBuilder
 @ToString
@@ -107,7 +109,8 @@ import java.util.regex.Pattern;
     aliases = "io.kestra.plugin.slack.app.Trigger"
 )
 public class Trigger extends AbstractWebhookTrigger implements TriggerOutput<Trigger.Output> {
-    private static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<>() {};
+    private static final TypeReference<Map<String, Object>> MAP_TYPE_REFERENCE = new TypeReference<>() {
+    };
     private static final ObjectMapper MAPPER = JacksonMapper.ofJson().copy().setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
 
     @PluginProperty
@@ -141,11 +144,12 @@ public class Trigger extends AbstractWebhookTrigger implements TriggerOutput<Tri
             try {
                 Response slackResp = app.run(slackReq);
 
-                return Mono.just(HttpResponse.builder()
-                    .status(HttpResponse.Status.valueOf(slackResp.getStatusCode()))
-                    .body(slackResp.getBody() != null ? slackResp.getBody() : null)
-                    .headers(httpHeaders(slackResp))
-                    .build()
+                return Mono.just(
+                    HttpResponse.builder()
+                        .status(HttpResponse.Status.valueOf(slackResp.getStatusCode()))
+                        .body(slackResp.getBody() != null ? slackResp.getBody() : null)
+                        .headers(httpHeaders(slackResp))
+                        .build()
                 );
             } catch (Exception e) {
                 throw new IllegalStateException("Failed to handle a slack request", e);
@@ -170,7 +174,8 @@ public class Trigger extends AbstractWebhookTrigger implements TriggerOutput<Tri
             .build();
     }
 
-    private com.slack.api.bolt.response.Response createExecution(WebhookContext context, RunContext runContext, EventsApiPayload<?> eventsApiPayload, com.slack.api.bolt.context.Context slackContext)  {
+    private com.slack.api.bolt.response.Response createExecution(WebhookContext context, RunContext runContext, EventsApiPayload<?> eventsApiPayload,
+        com.slack.api.bolt.context.Context slackContext) {
         Map<String, Object> body = MAPPER.convertValue(eventsApiPayload.getEvent(), MAP_TYPE_REFERENCE);
 
         if (runContext.logger().isTraceEnabled()) {
@@ -185,8 +190,8 @@ public class Trigger extends AbstractWebhookTrigger implements TriggerOutput<Tri
         );
     }
 
-
-    private com.slack.api.bolt.response.Response createExecution(WebhookContext context, RunContext runContext, com.slack.api.bolt.request.Request<?> request, com.slack.api.bolt.context.Context slackContext) {
+    private com.slack.api.bolt.response.Response createExecution(WebhookContext context, RunContext runContext, com.slack.api.bolt.request.Request<?> request,
+        com.slack.api.bolt.context.Context slackContext) {
         Map<String, Object> body = extractPayload(request);
 
         if (runContext.logger().isTraceEnabled()) {

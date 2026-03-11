@@ -1,7 +1,14 @@
 package io.kestra.plugin.slack.app.reactions;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.net.URI;
+import java.time.Instant;
+
 import com.slack.api.methods.request.reactions.ReactionsGetRequest;
 import com.slack.api.methods.response.reactions.ReactionsGetResponse;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Metric;
 import io.kestra.core.models.annotations.Plugin;
@@ -13,18 +20,13 @@ import io.kestra.core.serializers.FileSerde;
 import io.kestra.plugin.slack.AbstractSlackClientConnection;
 import io.kestra.plugin.slack.app.models.ReactionOutput;
 import io.kestra.plugin.slack.services.MessageService;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 import reactor.core.publisher.Flux;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.net.URI;
-import java.time.Instant;
 
 @SuperBuilder
 @ToString
@@ -126,11 +128,12 @@ public class Get extends AbstractSlackClientConnection implements RunnableTask<G
         try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(tempFile), FileSerde.BUFFER_SIZE)) {
             ReactionsGetResponse response = call(runContext, (client) -> client.reactionsGet(builder.build()));
 
-            Flux<ReactionOutput> flux = Flux.fromStream(response
-                .getMessage()
-                .getReactions()
-                .stream()
-                .map(ReactionOutput::of)
+            Flux<ReactionOutput> flux = Flux.fromStream(
+                response
+                    .getMessage()
+                    .getReactions()
+                    .stream()
+                    .map(ReactionOutput::of)
             );
             FileSerde.writeAll(fileWriter, flux).block();
             runContext.metric(Counter.of("records", response.getMessage().getReactions().size()));

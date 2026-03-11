@@ -1,8 +1,13 @@
 package io.kestra.plugin.slack.app.canvases;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slack.api.methods.request.canvases.CanvasesEditRequest;
 import com.slack.api.model.canvas.CanvasDocumentChange;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
@@ -11,14 +16,11 @@ import io.kestra.core.models.tasks.VoidOutput;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.JacksonMapper;
 import io.kestra.plugin.slack.AbstractSlackClientConnection;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @SuperBuilder
 @ToString
@@ -113,7 +115,7 @@ public class Edit extends AbstractSlackClientConnection implements RunnableTask<
         var builder = CanvasesEditRequest.builder();
 
         runContext.render(this.canvasId).as(String.class).ifPresent(builder::canvasId);
-        
+
         var changesList = runContext.render(this.changes).asList(Map.class);
         if (!changesList.isEmpty()) {
             List<CanvasDocumentChange> documentChanges = changesList.stream()

@@ -1,10 +1,10 @@
 package io.kestra.plugin.slack.services;
 
+import java.time.Instant;
+
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.JacksonMapper;
-
-import java.time.Instant;
 
 public class MessageService {
     public static String prepareMessageAsJson(RunContext runContext, Property<String> payload, Property<String> messageText) throws Exception {
@@ -25,7 +25,8 @@ public class MessageService {
                 // not valid Json, so proceed with markdown text
                 String rMessageTextMrkdwn = toSlackMrkdwn(rMessageText);
                 return JacksonMapper.ofJson().writeValueAsString(
-                    JacksonMapper.ofJson().createObjectNode().put("text", rMessageTextMrkdwn));
+                    JacksonMapper.ofJson().createObjectNode().put("text", rMessageTextMrkdwn)
+                );
             }
         }
 

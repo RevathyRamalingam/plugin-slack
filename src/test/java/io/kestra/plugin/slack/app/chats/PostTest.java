@@ -1,16 +1,18 @@
 package io.kestra.plugin.slack.app.chats;
 
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.runners.RunContextFactory;
 import io.kestra.core.utils.IdUtils;
 import io.kestra.core.utils.TestsUtils;
-import io.kestra.plugin.slack.app.AbstractSlackClientTest;
 import io.kestra.plugin.slack.FakeWebhookController;
-import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
+import io.kestra.plugin.slack.app.AbstractSlackClientTest;
 
-import java.util.Map;
+import jakarta.inject.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,6 +34,7 @@ public class PostTest extends AbstractSlackClientTest {
 
         task.run(TestsUtils.mockRunContext(runContextFactory, task, Map.of()));
 
-        assertThat(FakeWebhookController.data).contains("channel=%40channel&text=A%20message%20*with%20some%20bold%20text*&link_names=0&mrkdwn=1&unfurl_links=0&unfurl_media=0&reply_broadcast=0");
+        assertThat(FakeWebhookController.data)
+            .contains("channel=%40channel&text=A%20message%20*with%20some%20bold%20text*&link_names=0&mrkdwn=1&unfurl_links=0&unfurl_media=0&reply_broadcast=0");
     }
 }

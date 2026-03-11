@@ -1,9 +1,12 @@
 package io.kestra.plugin.slack.app.canvases;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slack.api.methods.request.canvases.CanvasesCreateRequest;
 import com.slack.api.methods.response.canvases.CanvasesCreateResponse;
 import com.slack.api.model.canvas.CanvasDocumentContent;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
@@ -12,12 +15,11 @@ import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.JacksonMapper;
 import io.kestra.plugin.slack.AbstractSlackClientConnection;
 import io.kestra.plugin.slack.app.models.CanvasOutput;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-
-import java.util.Map;
 
 @SuperBuilder
 @ToString
@@ -46,9 +48,9 @@ import java.util.Map;
                       type: "markdown"
                       markdown: |
                         ## Overview
-                        
+
                         This is a project documentation canvas.
-                        
+
                         - [ ] Task 1
                         - [ ] Task 2
                 """

@@ -1,7 +1,16 @@
 package io.kestra.plugin.slack.app;
 
+import java.net.URLEncoder;
+import java.net.http.HttpHeaders;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.slack.api.app_backend.SlackSignature;
+
 import io.kestra.core.http.HttpRequest;
 import io.kestra.core.http.HttpResponse;
 import io.kestra.core.junit.annotations.KestraTest;
@@ -16,15 +25,9 @@ import io.kestra.plugin.core.trigger.AbstractWebhookTrigger;
 import io.kestra.plugin.core.trigger.WebhookContext;
 import io.kestra.plugin.core.trigger.WebhookResponse;
 import io.kestra.plugin.slack.app.core.Trigger;
-import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
 
-import java.net.URLEncoder;
-import java.net.http.HttpHeaders;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
+import jakarta.inject.Inject;
+import reactor.core.publisher.Mono;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -52,11 +55,13 @@ class TriggerTest {
     private WebhookContext webhookContext(Flow flow, Trigger appTrigger, String body) {
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
 
-        var headers =  HttpHeaders.of(Map.of(
-            "Content-Type", List.of("application/json"),
-            SlackSignature.HeaderNames.X_SLACK_REQUEST_TIMESTAMP, List.of(timestamp),
-            SlackSignature.HeaderNames.X_SLACK_SIGNATURE, List.of(generator.generate(timestamp, body))
-        ), (s1, s2) -> true);
+        var headers = HttpHeaders.of(
+            Map.of(
+                "Content-Type", List.of("application/json"),
+                SlackSignature.HeaderNames.X_SLACK_REQUEST_TIMESTAMP, List.of(timestamp),
+                SlackSignature.HeaderNames.X_SLACK_SIGNATURE, List.of(generator.generate(timestamp, body))
+            ), (s1, s2) -> true
+        );
 
         HttpRequest post = HttpRequest.builder()
             .uri(uriProvider.webhookUrl(flow, appTrigger))
@@ -97,11 +102,13 @@ class TriggerTest {
         Flow flow = flow(appTrigger);
 
         String body = JacksonMapper.ofJson()
-            .writeValueAsString(Map.of(
-                "token", "fixed-value",
-                "challenge", "challenge-value",
-                "type", "url_verification"
-            ));
+            .writeValueAsString(
+                Map.of(
+                    "token", "fixed-value",
+                    "challenge", "challenge-value",
+                    "type", "url_verification"
+                )
+            );
 
         WebhookContext build = webhookContext(flow, appTrigger, body);
 

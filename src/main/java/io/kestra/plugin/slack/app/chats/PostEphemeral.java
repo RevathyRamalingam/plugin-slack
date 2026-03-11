@@ -1,7 +1,10 @@
 package io.kestra.plugin.slack.app.chats;
 
+import java.time.Instant;
+import java.util.Map;
 
 import com.slack.api.methods.request.chat.ChatPostEphemeralRequest;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.property.Property;
@@ -11,14 +14,12 @@ import io.kestra.core.serializers.JacksonMapper;
 import io.kestra.plugin.slack.AbstractSlackClientConnection;
 import io.kestra.plugin.slack.MessagePayloadInterface;
 import io.kestra.plugin.slack.services.MessageService;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-
-import java.time.Instant;
-import java.util.Map;
 
 @SuperBuilder
 @ToString

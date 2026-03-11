@@ -1,7 +1,18 @@
 package io.kestra.plugin.slack.app.files;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.time.Instant;
+import java.util.List;
+
+import org.apache.commons.io.IOUtils;
+
 import com.slack.api.methods.request.files.FilesUploadV2Request;
 import com.slack.api.methods.response.files.FilesUploadV2Response;
+
 import io.kestra.core.models.annotations.Example;
 import io.kestra.core.models.annotations.Plugin;
 import io.kestra.core.models.annotations.PluginProperty;
@@ -12,20 +23,12 @@ import io.kestra.core.serializers.FileSerde;
 import io.kestra.core.utils.FileUtils;
 import io.kestra.plugin.slack.AbstractSlackClientConnection;
 import io.kestra.plugin.slack.services.MessageService;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
-import org.apache.commons.io.IOUtils;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.time.Instant;
-import java.util.List;
 
 @SuperBuilder
 @ToString

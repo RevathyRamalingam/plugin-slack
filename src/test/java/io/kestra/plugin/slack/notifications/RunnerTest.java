@@ -1,5 +1,10 @@
 package io.kestra.plugin.slack.notifications;
 
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
+
+import org.junit.jupiter.api.Test;
+
 import io.kestra.core.junit.annotations.KestraTest;
 import io.kestra.core.junit.annotations.LoadFlows;
 import io.kestra.core.models.executions.Execution;
@@ -7,12 +12,9 @@ import io.kestra.core.models.flows.State;
 import io.kestra.core.queues.QueueException;
 import io.kestra.core.runners.FlowInputOutput;
 import io.kestra.core.runners.TestRunnerUtils;
+
 import io.micronaut.context.annotation.Value;
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 import static io.kestra.core.tenant.TenantService.MAIN_TENANT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +31,7 @@ class RunnerTest {
     private FlowInputOutput flowIO;
 
     @Test
-    @LoadFlows(value = {"sanity-checks/chat-reactions.yaml"})
+    @LoadFlows(value = { "sanity-checks/chat-reactions.yaml" })
     void chat() throws QueueException, TimeoutException {
         Execution execution = runnerUtils.runOne(
             MAIN_TENANT,
@@ -45,7 +47,7 @@ class RunnerTest {
     }
 
     @Test
-    @LoadFlows(value = {"sanity-checks/file.yaml"})
+    @LoadFlows(value = { "sanity-checks/file.yaml" })
     void file() throws QueueException, TimeoutException {
         Execution execution = runnerUtils.runOne(
             MAIN_TENANT,
@@ -61,7 +63,7 @@ class RunnerTest {
     }
 
     @Test
-    @LoadFlows(value = {"sanity-checks/chat-stream.yaml"})
+    @LoadFlows(value = { "sanity-checks/chat-stream.yaml" })
     void chatStream() throws QueueException, TimeoutException {
         Execution execution = runnerUtils.runOne(
             MAIN_TENANT,
@@ -77,7 +79,7 @@ class RunnerTest {
     }
 
     @Test
-    @LoadFlows(value = {"sanity-checks/chat-schedule.yaml"})
+    @LoadFlows(value = { "sanity-checks/chat-schedule.yaml" })
     void chatSchedule() throws QueueException, TimeoutException {
         Execution execution = runnerUtils.runOne(
             MAIN_TENANT,
@@ -93,7 +95,7 @@ class RunnerTest {
     }
 
     @Test
-    @LoadFlows(value = {"sanity-checks/user.yaml"})
+    @LoadFlows(value = { "sanity-checks/user.yaml" })
     void user() throws QueueException, TimeoutException {
         Execution execution = runnerUtils.runOne(
             MAIN_TENANT,

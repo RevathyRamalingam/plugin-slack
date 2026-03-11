@@ -1,16 +1,17 @@
 package io.kestra.plugin.slack;
 
-import com.slack.api.methods.response.conversations.ConversationsListResponse;
-import com.slack.api.model.*;
-import io.micronaut.http.HttpRequest;
-import io.micronaut.http.HttpResponse;
-import io.micronaut.http.MediaType;
-import io.micronaut.http.annotation.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
+
+import com.slack.api.methods.response.conversations.ConversationsListResponse;
+import com.slack.api.model.*;
+
+import io.micronaut.http.HttpRequest;
+import io.micronaut.http.HttpResponse;
+import io.micronaut.http.MediaType;
+import io.micronaut.http.annotation.*;
 
 import static io.kestra.plugin.slack.app.AbstractSlackClientTest.convertToSlack;
 
@@ -20,18 +21,19 @@ public class FakeWebhookController {
     public static Map<String, String> headers = new HashMap<>();
 
     @Post
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED})
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
     public HttpResponse<String> post(@Body String data) {
         FakeWebhookController.data = data;
         return HttpResponse.ok("ok");
     }
 
     @Post("/with-headers")
-    @Consumes({MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED})
+    @Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_FORM_URLENCODED })
     public HttpResponse<String> postWithHeaders(HttpRequest<?> request, @Body String data) {
 
         FakeWebhookController.data = data;
-        request.getHeaders().forEach((name, values) -> {
+        request.getHeaders().forEach((name, values) ->
+        {
             if (!values.isEmpty()) {
                 headers.put(name, values.getFirst());
             }
@@ -41,7 +43,7 @@ public class FakeWebhookController {
     }
 
     @Post("/mock/conversationslist/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockConversationsList(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -52,9 +54,10 @@ public class FakeWebhookController {
         metadata.setNextCursor(data.contains("cursor_abc") ? null : "cursor_abc");
 
         var list = IntStream.range(data.contains("cursor_abc") ? 10 : 0, data.contains("cursor_abc") ? 20 : 10)
-            .mapToObj(i -> Conversation.builder()
-                .id("test" + i)
-                .build()
+            .mapToObj(
+                i -> Conversation.builder()
+                    .id("test" + i)
+                    .build()
             )
             .toList();
 
@@ -65,7 +68,7 @@ public class FakeWebhookController {
     }
 
     @Post("/mock/conversationsmembers/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockConversationsMembers(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -76,15 +79,19 @@ public class FakeWebhookController {
             .mapToObj(i -> "U" + String.format("%010d", i))
             .toList();
 
-        return HttpResponse.ok(convertToSlack(Map.of(
-            "ok", true,
-            "members", members,
-            "response_metadata", metadata
-        )));
+        return HttpResponse.ok(
+            convertToSlack(
+                Map.of(
+                    "ok", true,
+                    "members", members,
+                    "response_metadata", metadata
+                )
+            )
+        );
     }
 
     @Post("/mock/conversationshistory/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockConversationsHistory(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -92,57 +99,71 @@ public class FakeWebhookController {
         metadata.setNextCursor(data.contains("cursor_history") ? null : "cursor_history");
 
         var messages = IntStream.range(data.contains("cursor_history") ? 20 : 0, data.contains("cursor_history") ? 30 : 20)
-            .mapToObj(i -> Map.of(
-                "type", "message",
-                "user", "U" + String.format("%010d", i),
-                "text", "Message " + i,
-                "ts", "1234567890." + String.format("%06d", i)
-            ))
+            .mapToObj(
+                i -> Map.of(
+                    "type", "message",
+                    "user", "U" + String.format("%010d", i),
+                    "text", "Message " + i,
+                    "ts", "1234567890." + String.format("%06d", i)
+                )
+            )
             .toList();
 
-        return HttpResponse.ok(convertToSlack(Map.of(
-            "ok", true,
-            "messages", messages,
-            "has_more", !data.contains("cursor_history"),
-            "response_metadata", metadata
-        )));
+        return HttpResponse.ok(
+            convertToSlack(
+                Map.of(
+                    "ok", true,
+                    "messages", messages,
+                    "has_more", !data.contains("cursor_history"),
+                    "response_metadata", metadata
+                )
+            )
+        );
     }
 
     @Post("/mock/reactionsget/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockReactionsGet(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
         var reactions = IntStream.range(0, 20)
-            .mapToObj(i -> Reaction.builder()
-                        .name("thumbsup-" + i)
-                        .users(List.of("U1234567890", "U0987654321"))
-                        .count(2)
-                        .build()
+            .mapToObj(
+                i -> Reaction.builder()
+                    .name("thumbsup-" + i)
+                    .users(List.of("U1234567890", "U0987654321"))
+                    .count(2)
+                    .build()
             )
             .toList();
 
-        return HttpResponse.ok(convertToSlack(Map.of(
-            "ok", true,
-            "message", Map.of(
-                "reactions", reactions
+        return HttpResponse.ok(
+            convertToSlack(
+                Map.of(
+                    "ok", true,
+                    "message", Map.of(
+                        "reactions", reactions
+                    )
+                )
             )
-        )));
+        );
     }
 
     @Get("/mock/conversations/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockConversation(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
-        return HttpResponse.ok(convertToSlack(Conversation.builder()
-            .id("test")
-            .build()
-        ));
+        return HttpResponse.ok(
+            convertToSlack(
+                Conversation.builder()
+                    .id("test")
+                    .build()
+            )
+        );
     }
 
     @Post("/mock/conversations/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockConversationPost(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -152,16 +173,21 @@ public class FakeWebhookController {
         Topic topic = new Topic();
         topic.setValue("purpose");
 
-        return HttpResponse.ok(convertToSlack(Map.of("ok", "true", "channel", Conversation.builder()
-            .id("test")
-            .purpose(purpose)
-            .topic(topic)
-            .build()
-        )));
+        return HttpResponse.ok(
+            convertToSlack(
+                Map.of(
+                    "ok", "true", "channel", Conversation.builder()
+                        .id("test")
+                        .purpose(purpose)
+                        .topic(topic)
+                        .build()
+                )
+            )
+        );
     }
 
     @Get("/mock/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockGet(HttpRequest<?> request, String method, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -169,7 +195,7 @@ public class FakeWebhookController {
     }
 
     @Post("/mock/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockPost(HttpRequest<?> request, String method, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -186,7 +212,7 @@ public class FakeWebhookController {
     }
 
     @Post("/mock/users/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockUsers(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -220,14 +246,18 @@ public class FakeWebhookController {
             Map.entry("updated", 1234567890)
         );
 
-        return HttpResponse.ok(convertToSlack(Map.of(
-            "ok", true,
-            "user", user
-        )));
+        return HttpResponse.ok(
+            convertToSlack(
+                Map.of(
+                    "ok", true,
+                    "user", user
+                )
+            )
+        );
     }
 
     @Post("/mock/userslist/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockUsersList(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -235,7 +265,8 @@ public class FakeWebhookController {
         metadata.setNextCursor(data.contains("cursor_users") ? null : "cursor_users");
 
         var members = IntStream.range(data.contains("cursor_users") ? 10 : 0, data.contains("cursor_users") ? 15 : 10)
-            .mapToObj(i -> {
+            .mapToObj(i ->
+            {
                 var profile = Map.of(
                     "real_name", "User " + i,
                     "display_name", "user" + i,
@@ -253,15 +284,19 @@ public class FakeWebhookController {
             })
             .toList();
 
-        return HttpResponse.ok(convertToSlack(Map.of(
-            "ok", true,
-            "members", members,
-            "response_metadata", metadata
-        )));
+        return HttpResponse.ok(
+            convertToSlack(
+                Map.of(
+                    "ok", true,
+                    "members", members,
+                    "response_metadata", metadata
+                )
+            )
+        );
     }
 
     @Post("/mock/usersconversations/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockUsersConversations(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -269,38 +304,47 @@ public class FakeWebhookController {
         metadata.setNextCursor(data.contains("cursor_conv") ? null : "cursor_conv");
 
         var channels = IntStream.range(data.contains("cursor_conv") ? 5 : 0, data.contains("cursor_conv") ? 10 : 5)
-            .mapToObj(i -> Conversation.builder()
-                .id("C" + String.format("%010d", i))
-                .name("channel-" + i)
-                .build()
+            .mapToObj(
+                i -> Conversation.builder()
+                    .id("C" + String.format("%010d", i))
+                    .name("channel-" + i)
+                    .build()
             )
             .toList();
 
-        return HttpResponse.ok(convertToSlack(Map.of(
-            "ok", true,
-            "channels", channels,
-            "response_metadata", metadata
-        )));
+        return HttpResponse.ok(
+            convertToSlack(
+                Map.of(
+                    "ok", true,
+                    "channels", channels,
+                    "response_metadata", metadata
+                )
+            )
+        );
     }
 
     @Post("/mock/usersgetpresence/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockGetPresence(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
-        return HttpResponse.ok(convertToSlack(Map.of(
-            "ok", true,
-            "presence", "active",
-            "online", true,
-            "auto_away", false,
-            "manual_away", false,
-            "connection_count", 2,
-            "last_activity", 1234567890
-        )));
+        return HttpResponse.ok(
+            convertToSlack(
+                Map.of(
+                    "ok", true,
+                    "presence", "active",
+                    "online", true,
+                    "auto_away", false,
+                    "manual_away", false,
+                    "connection_count", 2,
+                    "last_activity", 1234567890
+                )
+            )
+        );
     }
 
     @Post("/mock/usersprofile/{method}")
-    @Consumes({MediaType.ALL})
+    @Consumes({ MediaType.ALL })
     public HttpResponse<?> mockUsersProfile(HttpRequest<?> request, @Body String data) {
         FakeWebhookController.data = data;
 
@@ -314,9 +358,13 @@ public class FakeWebhookController {
             Map.entry("status_emoji", ":calendar:")
         );
 
-        return HttpResponse.ok(convertToSlack(Map.of(
-            "ok", true,
-            "profile", profile
-        )));
+        return HttpResponse.ok(
+            convertToSlack(
+                Map.of(
+                    "ok", true,
+                    "profile", profile
+                )
+            )
+        );
     }
 }

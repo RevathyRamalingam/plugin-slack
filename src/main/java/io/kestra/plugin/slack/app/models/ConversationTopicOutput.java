@@ -1,15 +1,17 @@
 package io.kestra.plugin.slack.app.models;
 
+import java.time.Instant;
+
 import com.slack.api.model.Purpose;
 import com.slack.api.model.Topic;
+
 import io.kestra.core.models.annotations.PluginProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Value;
 import lombok.extern.jackson.Jacksonized;
-
-import java.time.Instant;
 
 import static io.kestra.plugin.slack.services.MessageService.fromSlackTimestamp;
 

@@ -1,9 +1,10 @@
 package io.kestra.plugin.slack.app.chats;
 
-import io.kestra.core.models.property.Property;
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.Instant;
+
+import io.kestra.core.models.property.Property;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public interface ChatInterface {
     @Schema(title = "Channel to send message", description = "Channel ID or name; can also be set inside the payload.")
