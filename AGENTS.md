@@ -7,8 +7,9 @@
 
 ## Why
 
-- This plugin integrates Kestra with Slack App.
-- It provides tasks that run Slack App workflows and triggers using bot tokens.
+- What user problem does this solve? Teams need to slack notification webhooks and full Slack App automations across chat, files, canvases, channels, reactions, users, and events from orchestrated workflows instead of relying on manual console work, ad hoc scripts, or disconnected schedulers.
+- Why would a team adopt this plugin in a workflow? It keeps Slack steps in the same Kestra flow as upstream preparation, approvals, retries, notifications, and downstream systems.
+- What operational/business outcome does it enable? It reduces manual handoffs and fragmented tooling while improving reliability, traceability, and delivery speed for processes that depend on Slack.
 
 ## How
 
