@@ -1,4 +1,5 @@
 @PluginSubGroup(
+    title = "Slack Chats",
     description = "This sub-group of plugins contains tasks for Slack chat messages and streams.",
     categories = PluginSubGroup.PluginCategory.BUSINESS
 )

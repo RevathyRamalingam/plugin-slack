@@ -1,4 +1,5 @@
 @PluginSubGroup(
+    title = "Slack Notifications",
     description = "This sub-group of plugins contains tasks for Slack notifications.",
     categories = PluginSubGroup.PluginCategory.BUSINESS
 )

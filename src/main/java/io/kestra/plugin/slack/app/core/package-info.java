@@ -1,4 +1,5 @@
 @PluginSubGroup(
+    title = "Slack App",
     description = "This sub-group of plugins contains Slack app event triggers.",
     categories = PluginSubGroup.PluginCategory.BUSINESS
 )

@@ -1,4 +1,5 @@
 @PluginSubGroup(
+    title = "Slack Models",
     description = "This sub-group of plugins contains output models for Slack app tasks.",
     categories = PluginSubGroup.PluginCategory.BUSINESS
 )
