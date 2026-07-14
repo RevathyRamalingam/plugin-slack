@@ -33,7 +33,6 @@ import io.kestra.core.models.executions.Execution;
 import io.kestra.core.models.property.Property;
 import io.kestra.core.models.tasks.common.EncryptedString;
 import io.kestra.core.models.triggers.TriggerOutput;
-import io.kestra.core.queues.QueueException;
 import io.kestra.core.runners.RunContext;
 import io.kestra.core.serializers.JacksonMapper;
 import io.kestra.plugin.core.trigger.AbstractWebhookTrigger;
@@ -249,12 +248,7 @@ public class Trigger extends AbstractWebhookTrigger implements TriggerOutput<Tri
         if (maybeExecution.isEmpty()) {
             return slackContext.ack();
         } else {
-            try {
-                context.webhookService().startExecution(maybeExecution.get());
-            } catch (QueueException e) {
-                runContext.logger().error("Failed to start execution for slack webhook", e);
-                throw new RuntimeException(e);
-            }
+                context.webhookService().startExecution(maybeExecution.get()).block();
 
             WebhookResponse webhookResponse = context.webhookService().executionResponse(maybeExecution.get());
 
