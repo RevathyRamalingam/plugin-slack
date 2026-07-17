@@ -93,30 +93,20 @@ public class AbstractSlackTest {
     }
 
     protected Execution runAndCaptureExecution(String triggeringFlowId, String notificationFlowId, Map<String, Object> inputs) throws Exception {
-        CountDownLatch queueCount = new CountDownLatch(1);
-        AtomicReference<Execution> last = new AtomicReference<>();
-
-        executionQueue.addListener(execution ->
-        {
-            if (execution.getFlowId().equals(notificationFlowId)) {
-                last.set(execution);
-                queueCount.countDown();
-            }
-        });
-
-        Execution execution;
-
         Flow flow = flowRepository.findById(MAIN_TENANT, "io.kestra.tests", triggeringFlowId).orElseThrow();
 
-        execution = runnerUtils.runOne(
+        Execution execution = runnerUtils.runOne(
             flow,
             (f, e) -> inputs != null ? inputs : Map.of()
         );
 
-        boolean await = queueCount.await(20, TimeUnit.SECONDS);
-        assertThat(await, is(true));
-
-        Execution triggeredExecution = last.get();
+        Execution triggeredExecution = runnerUtils.awaitFlowExecution(
+            e -> e.getTrigger() != null && execution.getId().equals(e.getTrigger().getVariables().get("executionId")),
+            MAIN_TENANT,
+            "io.kestra.tests",
+            notificationFlowId,
+            Duration.ofSeconds(30)
+        );
         assertThat(triggeredExecution, notNullValue());
         assertThat(triggeredExecution.getTrigger().getVariables().get("executionId"), is(execution.getId()));
 
