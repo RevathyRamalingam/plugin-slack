@@ -248,7 +248,7 @@ public class Trigger extends AbstractWebhookTrigger implements TriggerOutput<Tri
         if (maybeExecution.isEmpty()) {
             return slackContext.ack();
         } else {
-                context.webhookService().startExecution(maybeExecution.get()).block();
+                context.webhookService().startExecution(maybeExecution.get()).subscribe();
 
             WebhookResponse webhookResponse = context.webhookService().executionResponse(maybeExecution.get());
 
